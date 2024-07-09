@@ -246,16 +246,18 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 });
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
-  const avatarPath = req.file?.avatar[0]?.path;
+  const avatarPath = req.file?.path;
+  
   if (!avatarPath) {
     throw new ApiError(400, "Avatar File Required");
   }
+  
   const avatar = await uploadOnCloudinary(avatarPath);
   if (!avatar) {
     throw new ApiError(400, "Avatar File Required");
   }
+  
   const {avatar: oldAvatarPath} = await User.findById(req.user?._id).select("-password -refreshToken");
-
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
@@ -269,7 +271,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(500, "Failed to update Avatar");
   }
-  const avatarDeleted = await deleteFromCloudinary(oldAvatarPath)
+  await deleteFromCloudinary(oldAvatarPath)
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Avatar Updated Succesfuly"));

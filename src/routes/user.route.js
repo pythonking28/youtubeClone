@@ -38,9 +38,7 @@ router.route("/refresh-token").post(refreshAccessToken);
 router.route("/change-password").post(verifyJWT, changeCurrentUserPassword);
 router.route("/get-user").post(verifyJWT, getCurrentUser);
 router.route("/update-account-details").patch(verifyJWT, updateAccountDetails);
-router
-  .route("/update-user-avatar")
-  .patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
+router.route("/update-user-avatar").patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
 router
   .route("/update-user-cover-image")
   .patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage);
