@@ -19,7 +19,9 @@ const getAllVideos = asyncHandler(async (req, res) => {
   //TODO: get all videos based on query, sort, pagination
 
   const regex = new RegExp(query, 'i')
-  const search = await Video.aggregate([
+  const sortTypeInt = parseInt(sortType, 10);
+  //No await in aggregation pipeline as aggregate should be passed not the result to aggregate paginate
+  const search = Video.aggregate([
     {
     $match: {
         title: {
@@ -29,7 +31,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
   },
   {
     $sort: {
-        sortBy: Number(sortType)
+        [sortBy]: sortTypeInt
     }
   },
   {
@@ -44,15 +46,18 @@ const getAllVideos = asyncHandler(async (req, res) => {
     }
   }
 ])
-
-  
   
   const options = {
-    page: page,
-    limit: limit
+    page: Number(page),
+    limit: Number(limit)
 };
 
-    return res.status(200).json(new ApiResponse(200, search, "The searched files are successfully retreived"))
+//Aggregation and pagination will be done here so await
+
+ const results = await Video.aggregatePaginate(search, options)
+
+
+    return res.status(200).json(new ApiResponse(200, results, "The searched files are successfully retreived"))
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
