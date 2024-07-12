@@ -13,15 +13,46 @@ const getAllVideos = asyncHandler(async (req, res) => {
     limit = 10,
     query,
     sortBy = "createdAt",
-    sortType = "video",
+    sortType = "1",
     userId,
   } = req.query;
   //TODO: get all videos based on query, sort, pagination
+
+  const regex = new RegExp(query, 'i')
+  const search = await Video.aggregate([
+    {
+    $match: {
+        title: {
+            $regex: regex
+        }
+    }
+  },
+  {
+    $sort: {
+        sortBy: Number(sortType)
+    }
+  },
+  {
+    $project:{
+        title: 1,
+        videoFile: 1,
+        description: 1,
+        thumbnail: 1,
+        duration: 1,
+        views: 1,
+        owner: 1
+    }
+  }
+])
+
+  
   
   const options = {
     page: page,
     limit: limit
 };
+
+    return res.status(200).json(new ApiResponse(200, search, "The searched files are successfully retreived"))
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
