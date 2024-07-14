@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const likeschema = new Schema({
+const likeSchema = new Schema({
     video: {
         type: Schema.Types.ObjectId,
         ref: 'Video'
