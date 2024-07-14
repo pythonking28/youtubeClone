@@ -33,16 +33,14 @@ const getUserTweets = asyncHandler(async (req, res) => {
         throw new ApiError(400, "No user Id detected");
     }
 
-    console.log("AAya 1")
     if(!req.user?._id){
         throw new ApiError(400, "Unauthorized Request")
     }
-    console.log("AAya 2")
 
     const tweetData = await Tweet.aggregate([
         {
             $match: {
-                owner: userId
+                owner: new mongoose.Types.ObjectId(userId)
             }
         },
         {
@@ -64,17 +62,57 @@ const getUserTweets = asyncHandler(async (req, res) => {
         },
 
     ])
-    console.log("AAya 3")
+    if(!tweetData){
+        throw new ApiErro(400, "Failed to the the tweets")
+    }
+
 
     return res.status(200).json(new ApiResponse(200, tweetData, "Tweets retreived Successfully" ))
 })
 
 const updateTweet = asyncHandler(async (req, res) => {
     //TODO: update tweet
+    const { tweetId } = req.params;
+    const {content} = req.body
+    if(!tweetId){
+        throw new ApiError(400, "Tweet Id is required")
+    }
+    if(!content){
+        throw new ApiError(400, "No tweet was received")
+    }
+    if(!req.user?._id){
+        throw new ApiError(400, "Unauthorized Request")
+    }
+
+    const updatedTweet = await Tweet.findByIdAndUpdate(
+        tweetId,
+        {
+            content
+        }
+
+    )
+
+    if(!updatedTweet){
+        throw new ApiError(500, "Failed to update the tweet")
+    }
+    return res.status(200).json(new ApiResponse(200, updatedTweet, "Tweet Updated Successfully!!!"))
 })
 
 const deleteTweet = asyncHandler(async (req, res) => {
     //TODO: delete tweet
+    const {tweetId} = req.params;
+    if(!tweetId){
+        throw new ApiError(400, "Tweet Id is required")
+    }
+    if(!req.user?._id){
+        throw new ApiError(400, "Unauthorized Request")
+    }
+    const deletedTweet = await Tweet.findByIdAndDelete(tweetId);
+
+    if(!deletedTweet){
+        throw new ApiError(400, "Failed to delete the tweet")
+    }
+    return res.status(200).json(new ApiResponse(200, deletedTweet,"Tweet Deleted Successfully"))
 })
 
 export {
